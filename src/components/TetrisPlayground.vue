@@ -173,8 +173,8 @@ export default {
   background-color: grey;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  height: 900px;
-  width: 600px;
+  height: 600px;
+  width: 450px;
   margin: 0 auto;
   .ground-item {
     border: 0.025px solid rgb(139, 136, 136);
