@@ -1,6 +1,9 @@
 <template>
   <article>
-    <h1 @click="moveDown">My Minimal Tetris</h1>
+    <h1 @click="moveDown">
+      My Minimal Tetris - press 'Enter'
+      {{ this.activeGame ? "to pause" : "to start" }}
+    </h1>
 
     <div class="playground">
       <GroundItem
@@ -11,7 +14,7 @@
         :activeStatus="activeStatus[index + 1]"
       />
     </div>
-    <p class="points">Punkte: {{ points }}</p>
+    <p class="points">Points: {{ points }}</p>
     <p class="points">Level: {{ lvl }}</p>
   </article>
 </template>
@@ -27,7 +30,7 @@ export default {
       position: this.randomNumber(1, 10),
       activeStonePosition: "",
       activeStatus: [],
-      activeGame: true,
+      activeGame: false,
       color: "",
       points: 0,
       lvl: 1,
@@ -41,22 +44,32 @@ export default {
     this.color = this.randomColor();
     this.activeStatus[this.position] = this.color;
     window.addEventListener("keydown", (e) => {
+      console.log(e.key);
       if (e.key === "ArrowLeft") {
         this.moveManual("left");
       } else if (e.key === "ArrowRight") {
         this.moveManual("right");
       } else if (e.key === "ArrowDown") {
         this.moveManual("down");
+      } else if (e.key === "Enter") {
+        if (!this.activeGame) {
+          this.activeGame = setInterval(() => {
+            this.moveDown();
+          }, this.speed);
+        } else {
+          clearInterval(this.activeGame);
+          this.activeGame = false;
+        }
       }
     });
-  },
+  } /*
   mounted() {
     if (this.activeGame) {
       this.activeGame = setInterval(() => {
         this.moveDown();
       }, this.speed);
     }
-  },
+  },*/,
   methods: {
     moveDown() {
       if (

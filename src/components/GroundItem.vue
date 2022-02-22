@@ -38,11 +38,7 @@ export default {
   },
   computed: {
     statusCheck() {
-      return this.activeStatus === "wait"
-        ? "gray"
-        : this.activeStatus === "set"
-        ? this.activeStatus
-        : this.activeStatus;
+      return this.activeStatus === "wait" ? "gray" : this.activeStatus;
     },
   },
   methods: {
