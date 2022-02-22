@@ -90,6 +90,7 @@ export default {
       this.activeStatus[this.position] = this.color;
     },
     moveManual(direction) {
+      if (!this.activeGame) return;
       if (direction === "left") {
         if (
           this.activeStatus[this.position - 1] === "wait" &&
