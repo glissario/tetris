@@ -6,7 +6,7 @@
     :style="{ backgroundColor: statusCheck }"
     ref="index"
   >
-    {{}}
+    {{ index }}
   </div>
 </template>
 
@@ -15,7 +15,6 @@ export default {
   data() {
     return {
       wait: "gray",
-      active: "",
       set: "hotpink",
       bgColor: "",
     };
@@ -34,11 +33,12 @@ export default {
 
   props: {
     index: { Type: String, required: true },
-    activeStatus: { Type: String, required: true },
+    itemColor: { Type: String, required: true },
+    active: { Type: Boolean, required: true },
   },
   computed: {
     statusCheck() {
-      return this.activeStatus === "wait" ? "gray" : this.activeStatus;
+      return this.itemColor === "wait" ? "gray" : this.itemColor;
     },
   },
   methods: {

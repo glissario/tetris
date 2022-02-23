@@ -8,14 +8,15 @@
     <div class="playground">
       <GroundItem
         v-for="(item, index) of 150"
+        :active="false"
         :key="index"
-        :id="index + 1"
         :index="index + 1"
-        :activeStatus="activeStatus[index + 1]"
+        :itemColor="itemColor[index + 1]"
       />
     </div>
     <p class="points">Points: {{ points }}</p>
     <p class="points">Level: {{ lvl }}</p>
+    <button @click="delRow(14)">delete 14th row</button>
   </article>
 </template>
 
@@ -27,9 +28,10 @@ export default {
   },
   data() {
     return {
-      position: this.randomNumber(1, 10),
-      activeStonePosition: "",
-      activeStatus: [],
+      position: this.randomNumber(11, 19),
+      activeStonePosition: [this.position],
+      itemColor: [],
+      actualFigure: [],
       activeGame: false,
       color: "",
       points: 0,
@@ -39,22 +41,22 @@ export default {
   },
   created() {
     for (let i = 1; i <= 150; i++) {
-      this.activeStatus[i] = "wait";
+      this.itemColor[i] = "wait";
     }
     this.color = this.randomColor();
-    this.activeStatus[this.position] = this.color;
+    this.itemColor[this.position] = this.color;
+    this.actualFigure = this.createRect(this.position);
     window.addEventListener("keydown", (e) => {
-      console.log(e.key);
       if (e.key === "ArrowLeft") {
-        this.moveManual("left");
+        this.moveRectManual("left");
       } else if (e.key === "ArrowRight") {
-        this.moveManual("right");
+        this.moveRectManual("right");
       } else if (e.key === "ArrowDown") {
-        this.moveManual("down");
+        this.moveRectManual("down");
       } else if (e.key === "Enter") {
         if (!this.activeGame) {
           this.activeGame = setInterval(() => {
-            this.moveDown();
+            this.moveRectDown();
           }, this.speed);
         } else {
           clearInterval(this.activeGame);
@@ -62,57 +64,106 @@ export default {
         }
       }
     });
-  } /*
-  mounted() {
-    if (this.activeGame) {
-      this.activeGame = setInterval(() => {
-        this.moveDown();
-      }, this.speed);
-    }
-  },*/,
+  },
   methods: {
+    createRect() {
+      this.position === 20 ? (this.position = 19) : this.position;
+      this.itemColor[this.position] = this.color;
+      this.itemColor[this.position + 1] = this.color;
+      this.itemColor[this.position - 10] = this.color;
+      this.itemColor[this.position - 9] = this.color;
+      return [0, -10, 1, -9];
+    },
+    moveRectDown() {
+      if (
+        this.position > 140 ||
+        this.itemColor[this.position + 10] !== "wait" ||
+        this.itemColor[this.position + 1 + 10] !== "wait"
+      ) {
+        this.checkPoints();
+        this.color = this.randomColor();
+        this.position = this.randomNumber(10, 19);
+
+        this.activeStonePosition[0] = this.position;
+        this.itemColor[this.position] !== "wait"
+          ? clearInterval(this.activeGame)
+          : (this.actualFigure = this.createRect(this.randomNumber(10, 19)));
+        return "bottom";
+      }
+
+      for (let i = 0; i < this.actualFigure.length; i++) {
+        this.itemColor[this.position + this.actualFigure[i]] = "wait";
+        this.itemColor[this.position + 10 + this.actualFigure[i]] = this.color;
+      }
+      this.activeStonePosition[0] = this.position;
+      this.position = this.position + 10;
+    },
     moveDown() {
       if (
         this.position > 140 ||
-        this.activeStatus[this.position + 10] !== "wait"
+        this.itemColor[this.position + 10] !== "wait"
       ) {
-        this.activeStatus[this.position] = this.color;
         this.checkPoints();
         this.color = this.randomColor();
         this.position = this.randomNumber(1, 10);
-        this.activeStatus[this.position] !== "wait"
+        this.activeStonePosition[0] = this.position;
+        this.itemColor[this.position] !== "wait"
           ? clearInterval(this.activeGame)
-          : (this.activeStatus[this.position] = this.color);
-        return;
+          : (this.itemColor[this.position] = this.color);
+        return "bottom";
       }
-      this.activeStatus[this.position] = "wait";
+      this.itemColor[this.position] = "wait";
       this.position = this.position + 10;
-      this.activeStatus[this.position] = this.color;
+      this.activeStonePosition[0] = this.position;
+      this.itemColor[this.position] = this.color;
     },
-    moveManual(direction) {
+    moveRectManual(direction) {
       if (!this.activeGame) return;
       if (direction === "left") {
         if (
-          this.activeStatus[this.position - 1] === "wait" &&
+          this.itemColor[this.position - 1] === "wait" &&
+          this.itemColor[this.position - 11] === "wait" &&
           this.position % 10 !== 1
         ) {
-          this.activeStatus[this.position] = "wait";
+          for (let i = 0; i < this.actualFigure.length; i++) {
+            this.itemColor[this.position + this.actualFigure[i]] = "wait";
+            this.itemColor[this.position - 1 + this.actualFigure[i]] =
+              this.color;
+          }
           this.position--;
-          this.activeStatus[this.position] = this.color;
         }
       } else if (direction === "right") {
         if (
-          this.activeStatus[this.position + 1] === "wait" &&
-          this.position % 10 !== 0
+          this.itemColor[this.position + 2] === "wait" &&
+          this.itemColor[this.position - 8] === "wait" &&
+          (this.position + 1) % 10 !== 0
         ) {
-          this.activeStatus[this.position] = "wait";
+          console.log(this.position);
+          for (let i = this.actualFigure.length; i >= 0; i--) {
+            console.log(i);
+            this.itemColor[this.position + this.actualFigure[i]] = "wait";
+            this.itemColor[this.position + 1 + this.actualFigure[i]] =
+              this.color;
+          }
           this.position++;
-          this.activeStatus[this.position] = this.color;
         }
       } else if (direction === "down") {
-        this.moveDown();
+        this.moveRectDown();
       }
     },
+    delRow(n) {
+      for (let j = n; j > 1; j--) {
+        for (let i = 1; i <= 10; i++) {
+          if (this.activeStonePosition[0] !== (j - 1) * 10 + i) {
+            this.itemColor[j * 10 + i] = this.itemColor[(j - 1) * 10 + i];
+          }
+        }
+      }
+      for (let i = 1; i <= 10; i++) {
+        this.itemColor[i] = "wait";
+      }
+    },
+
     randomNumber(min, max) {
       const num = Math.random() * (max - min + 1) + min;
       return Math.floor(num);
@@ -142,12 +193,9 @@ export default {
     },
     checkPoints() {
       if (
-        this.activeStatus[this.position - 1] ===
-          this.activeStatus[this.position] ||
-        this.activeStatus[this.position + 1] ===
-          this.activeStatus[this.position] ||
-        this.activeStatus[this.position + 10] ===
-          this.activeStatus[this.position]
+        this.itemColor[this.position - 1] === this.itemColor[this.position] ||
+        this.itemColor[this.position + 1] === this.itemColor[this.position] ||
+        this.itemColor[this.position + 10] === this.itemColor[this.position]
       ) {
         this.points = this.points + 1;
       }
